@@ -1,0 +1,225 @@
+{% extends "base.html" %}
+{% block title %}PDFToText{% endblock title %}
+
+
+{% block body %}
+<div class="heading">
+    <h1 class="main-heading">PDF To Text Convertor</h1>
+    <h2 class="sub-heading">Convert your PDF to Text with incredible accuracy</h2>
+</div>
+<div class="uploader">
+    <form id="pdf-form" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="file" id="pdf-input" name="file" style="display: none;" accept=".pdf">
+        <button type="button" class="btn btn-primary btn-lg" id="select-pdf-button">Select PDF File</button>
+    </form>
+</div>
+{% if extracted_text %}
+<div class="extracted-text-block">
+    <div class="hr-divider"></div>
+    <h2 style="text-align: center;">Extracted Text:</h2>
+    <div class="text-wrapper">
+        <pre>{{ extracted_text }}</pre>
+    </div>
+    <!-- Copy Button -->
+    <button id="copyText" class="btn btn-secondary mt-2">Copy Text</button>
+
+    <!-- Download Buttons -->
+    <div class="mt-3 btn-group">
+        <a href="{% url 'download_text' %}?format=text&text={{ extracted_text|urlencode }}"
+            class="btn btn-success">Download as Text</a>
+        <a href="{% url 'download_text' %}?format=pdf&text={{ extracted_text|urlencode }}" class="btn btn-info">Download
+            as PDF</a>
+        <a href="{% url 'download_text' %}?format=docx&text={{ extracted_text|urlencode }}"
+            class="btn btn-warning">Download as DOCX</a>
+    </div>
+</div>
+{% endif %}
+<style>
+    .hr-divider {
+        border: none;
+        border-top: 1px solid #ccc;
+        margin: 20px 0;
+    }
+
+    .extracted-text-block {
+        margin: 0 auto !important;
+        max-width: 1200px !important;
+        padding: 20px !important;
+    }
+
+    .text-wrapper {
+        text-align: center;
+        font-size: 18px;
+    }
+
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f9f9f9;
+    }
+
+    pre {
+        background-color: #f0f0f0;
+        padding: 10px;
+        border-radius: 5px;
+        overflow-x: auto;
+    }
+
+    .btn-group {
+        display: flex;
+        justify-content: center;
+        margin-top: 20px;
+    }
+
+    .btn-group>a,
+    .btn-group>button {
+        margin: 0 10px;
+    }
+
+    button#copyText {
+        background-color: #4CAF50;
+        color: #fff;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        margin-left: 13px;
+    }
+
+    button#copyText:hover {
+        background-color: #3e8e41;
+    }
+
+    .mt-3 {
+        margin-top: 20px;
+    }
+
+    .btn {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    .btn-success {
+        background-color: #4CAF50;
+        color: #fff;
+    }
+
+    .btn-success:hover {
+        background-color: #3e8e41;
+    }
+
+    .btn-info {
+        background-color: #2196F3;
+        color: #fff;
+    }
+
+    .btn-info:hover {
+        background-color: #0b7dda;
+        color: #fff;
+    }
+
+    .btn-warning {
+        background-color: #FFC107;
+        color: #fff;
+    }
+
+    .btn-warning:hover {
+        background-color: #dfa90a;
+        color: #fff;
+    }
+
+    .uploader {
+        padding-top: 20px;
+        display: flex;
+        text-align: center;
+        justify-content: center;
+    }
+
+    pre {
+        text-align: left;
+        display: inline-block;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        background-color: #333;
+        /* Dark background */
+        color: #f9f9f9;
+        /* Light text */
+
+    }
+
+    .pre-dark {
+        background-color: #f0f0f0;
+        /* Light background */
+        color: #000;
+        /* Dark text */
+
+    }
+
+
+    .btn {
+        font-size: 24px;
+        padding: 12px 24px;
+        border-radius: 10px;
+    }
+
+    .main-heading {
+        display: flex;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 42px;
+        line-height: 86px;
+    }
+
+    .sub-heading {
+        display: flex;
+        justify-content: center;
+        word-spacing: 5px;
+        max-width: 800px;
+        margin: 8px auto 0;
+        line-height: 32px;
+        font-size: 22px;
+        font-weight: 400;
+
+    }
+</style>
+<script>
+    // Selecting the dark mode toggle button and all <pre> elements
+    const darkModeToggle = document.getElementById('theme-toggle'); // Replace with your actual toggle button ID
+    const preElements = document.querySelectorAll('pre');
+
+    // Toggle dark mode on button click
+    darkModeToggle.addEventListener('click', () => {
+        preElements.forEach(pre => {
+            pre.classList.toggle('pre-dark'); // Toggles between light and dark mode
+        });
+    });
+
+</script>
+
+<script>
+    const selectPdfButton = document.getElementById('select-pdf-button');
+    const pdfInput = document.getElementById('pdf-input');
+
+    selectPdfButton.addEventListener('click', () => {
+        pdfInput.click();
+    });
+
+    pdfInput.addEventListener('change', () => {
+        document.getElementById('pdf-form').submit();
+    });
+</script>
+<script>
+    document.getElementById('copyText').addEventListener('click', function () {
+        var text = document.querySelector('pre').innerText;
+        var textarea = document.createElement('textarea');
+        textarea.value = text;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+        alert('Text copied to clipboard!');
+    });
+</script>
+{% endblock body %}
